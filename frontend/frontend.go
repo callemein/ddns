@@ -34,7 +34,11 @@ func (f *Frontend) Run() error {
 	r.SetHTMLTemplate(buildTemplate())
 
 	r.GET("/", func(g *gin.Context) {
-		g.HTML(200, "index.html", gin.H{"domain": f.config.Domain})
+		if f.config.DisableWeb{
+			g.AbortWithStatus(204)
+		}else{
+			g.HTML(200, "index.html", gin.H{"domain": f.config.Domain})
+		}
 	})
 
 	r.GET("/available/:hostname", func(c *gin.Context) {
@@ -48,6 +52,53 @@ func (f *Frontend) Run() error {
 		c.JSON(200, gin.H{
 			"available": valid,
 		})
+	})
+
+	r.GET("/direct/:hostname/:secret", func(c *gin.Context) {
+		secret := c.Params.ByName("secret")
+
+		if secret != f.config.Secret  {
+			c.JSON(404, gin.H{"expected": f.config.Secret, "inputed": secret, "error": "This secret is not valid"})
+			return
+		}
+
+		hostname, valid := isValidHostname(c.Params.ByName("hostname"))
+
+		if !valid {
+			c.JSON(404, gin.H{"error": "This hostname is not valid"})
+			return
+		}
+
+		host := &shared.Host{Hostname: hostname, Ip: "127.0.0.1"}
+		host.GenerateAndSetToken()
+
+		var err error
+
+		if err = f.hosts.SetHost(host); err != nil {
+			c.JSON(400, gin.H{"error": "Could not register host."})
+			return
+		}
+
+		ip, err := extractRemoteAddr(c.Request)
+		if err != nil {
+			c.JSON(400, gin.H{
+				"error": "Your sender IP address is not in the right format",
+			})
+			return
+		}
+
+		host.Ip = ip
+		if err = f.hosts.SetHost(host); err != nil {
+			c.JSON(400, gin.H{
+				"error": "Could not update registered IP address",
+			})
+		}
+
+		c.JSON(200, gin.H{
+			"current_ip": ip,
+			"status":     "Successfuly updated",
+		})
+
 	})
 
 	r.GET("/new/:hostname", func(c *gin.Context) {
