@@ -45,6 +45,9 @@ func (l *HostLookup) Lookup(request *Request) (*Response, error) {
 	case "NS":
 		responseContent = l.config.SOAFqdn
 
+	case "TXT":
+		responseContent = l.config.AcmeTxtChallenge
+
 	case "A", "AAAA", "ANY":
 		hostname, err := l.extractHostname(request.QName)
 		if err != nil {

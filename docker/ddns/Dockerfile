@@ -10,4 +10,4 @@ RUN GO111MODULE=on go install -v ./...
 
 ENV GIN_MODE release
 
-CMD /go/bin/ddns --secret=${DDNS_SECRET} --disable_web=${DDNS_DISABLE_WEB} --domain=${DDNS_DOMAIN} --soa_fqdn=${DDNS_SOA_DOMAIN} --redis=${DDNS_REDIS_HOST}
+CMD /go/bin/ddns --secret=${DDNS_SECRET} --disable_web=${DDNS_DISABLE_WEB}  --acme-txt-challenge=${DDNS_ACME_TXT_CHALLENGE} --domain=${DDNS_DOMAIN} --soa_fqdn=${DDNS_SOA_DOMAIN} --redis=${DDNS_REDIS_HOST}

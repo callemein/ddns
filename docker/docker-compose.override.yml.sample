@@ -5,9 +5,9 @@ services:
     environment:
       DDNS_DOMAIN: d.example.net                      # <<< ADJUST DOMAIN
       DDNS_SOA_DOMAIN: ddns.example.net               # <<< ADJUST DOMAIN
-      DDNS_SECRET: ""				      # <<< SET DIRECT SECRET
+      DDNS_SECRET: ""				                          # <<< SET DIRECT SECRET
       DDNS_DISABLE_WEB: 0
- 
+      DDNS_ACME_TXT_CHALLENGE: "2gkvsNCItD-mj68ibQxOZiCSDnyOm1EdEgXC38BCfAg"
   powerdns:
     ports:
       - "53:53/udp"

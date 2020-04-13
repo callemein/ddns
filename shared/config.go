@@ -16,6 +16,7 @@ type Config struct {
 	ListenFrontend     string
 	ListenBackend      string
 	RedisHost          string
+	AcmeTxtChallenge   string
 }
 
 func (c *Config) Initialize() {
@@ -36,6 +37,9 @@ func (c *Config) Initialize() {
 
 	flag.StringVar(&c.RedisHost, "redis", ":6379",
 		"The Redis socket that should be used")
+
+	flag.StringVar(&c.AcmeTxtChallenge, "acme-txt-challenge", "",
+		"The ACME TXT record used for wildcard generation.")
 
 	flag.IntVar(&c.HostExpirationDays, "expiration-days", 10,
 		"The number of days after a host is released when it is not updated")
