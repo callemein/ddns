@@ -47,7 +47,7 @@ func (c *Config) Initialize() {
 	flag.BoolVar(&c.DisableWeb, "disable_web", false,
 		"Disable web interface")
 
-	flag.BoolVar(&c.Verbose, "verbose", false,
+	flag.BoolVar(&c.Verbose, "verbose", true,
 		"Be more verbose")
 }
 

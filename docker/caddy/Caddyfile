@@ -4,3 +4,8 @@
     transparent
   }
 }
+
+{$DDNS_CADDY_DOMAIN}:81 {
+  tls off
+  root /root/letsencrypt
+}

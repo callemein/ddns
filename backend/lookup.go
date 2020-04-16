@@ -54,20 +54,24 @@ func (l *HostLookup) Lookup(request *Request) (*Response, error) {
 			return nil, err
 		}
 
-		var host *shared.Host
-		if host, err = l.hosts.GetHost(hostname); err != nil {
-			return nil, err
-		}
+		if hostname != "_acme-challenge" {
+			var host *shared.Host
+			if host, err = l.hosts.GetHost(hostname); err != nil {
+				return nil, err
+			}
+			responseContent = host.Ip
 
-		responseContent = host.Ip
+			responseRecord = "A"
+			if !host.IsIPv4() {
+				responseRecord = "AAAA"
+			}
 
-		responseRecord = "A"
-		if !host.IsIPv4() {
-			responseRecord = "AAAA"
-		}
-
-		if (request.QType == "A" || request.QType == "AAAA") && request.QType != responseRecord {
-			return nil, errors.New("IP address is not valid for requested record")
+			if (request.QType == "A" || request.QType == "AAAA") && request.QType != responseRecord {
+				return nil, errors.New("IP address is not valid for requested record")
+			}
+		}else {
+			responseRecord = "TXT"
+			responseContent = l.config.AcmeTxtChallenge
 		}
 
 	default:

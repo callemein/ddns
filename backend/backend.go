@@ -28,6 +28,10 @@ func (b *Backend) Run() error {
 	}
 
 	r.GET("/dnsapi/lookup/:qname/:qtype", func(c *gin.Context) {
+		if b.config.Verbose {
+			log.Printf("Query: /dnsapi/lookup/%v/%v", c.Param("qname"), c.Param("qtype"))
+		}
+
 		request := &Request{
 			QName: strings.TrimRight(c.Param("qname"), "."),
 			QType: c.Param("qtype"),
