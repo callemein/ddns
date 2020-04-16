@@ -101,6 +101,55 @@ func (f *Frontend) Run() error {
 
 	})
 
+	r.GET("/redirect/:hostname/:redirect/:secret", func(c *gin.Context) {
+		secret := c.Params.ByName("secret")
+		redirect := c.Params.ByName("redirect")
+
+		if secret != f.config.Secret  {
+			c.JSON(404, gin.H{"expected": f.config.Secret, "inputed": secret, "error": "This secret is not valid"})
+			return
+		}
+
+		hostname, valid := isValidHostname(c.Params.ByName("hostname"))
+
+		if !valid {
+			c.JSON(404, gin.H{"error": "This hostname is not valid"})
+			return
+		}
+
+		host := &shared.Host{Hostname: hostname, Ip: "127.0.0.1"}
+		host.GenerateAndSetToken()
+
+		var err error
+
+		if err = f.hosts.SetHost(host); err != nil {
+			c.JSON(400, gin.H{"error": "Could not register host."})
+			return
+		}
+
+
+		ip, err := net.LookupIP(redirect)
+		if err != nil {
+			c.JSON(400, gin.H{
+				"error": "Your redirect address is not resolving.",
+			})
+			return
+		}
+
+		host.Ip = ip[0].String()
+		if err = f.hosts.SetHost(host); err != nil {
+			c.JSON(400, gin.H{
+				"error": "Could not update registered IP address",
+			})
+		}
+
+		c.JSON(200, gin.H{
+			"current_ip": ip,
+			"status":     "Successfuly updated",
+		})
+
+	})
+
 	r.GET("/new/:hostname", func(c *gin.Context) {
 		hostname, valid := isValidHostname(c.Params.ByName("hostname"))
 
